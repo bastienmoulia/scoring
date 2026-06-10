@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+ion-card {
+  margin-bottom: 1rem;
+}
+
+.team-score-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.team-name {
+  font-weight: 600;
+}
+
+.score {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+}
