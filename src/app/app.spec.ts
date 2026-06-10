@@ -41,6 +41,25 @@ describe('App', () => {
     expect(app.canCreateGame).toBeFalse();
   });
 
+
+  it('should update team score through service', async () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+
+    await app.changeScore(
+      {
+        id: 'game-1',
+        name: 'Finale',
+        teams: { teamA: 'Lions', teamB: 'Tigers' },
+        scores: { teamA: 0, teamB: 0 }
+      },
+      'teamA',
+      1
+    );
+
+    expect(serviceSpy.updateScore).toHaveBeenCalledWith('game-1', 'teamA', 1);
+  });
+
   it('should create game with selected teams', async () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;

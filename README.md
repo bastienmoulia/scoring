@@ -11,7 +11,7 @@ Application Ionic + Angular + Firebase pour créer des parties et modifier les s
 
 Renseignez vos clés Firebase dans :
 
-`/home/runner/work/scoring/scoring/bastienmoulia/scoring/src/environments/environment.ts`
+`src/environments/environment.ts`
 
 ## Lancer en web
 
