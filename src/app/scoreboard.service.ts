@@ -26,6 +26,20 @@ export interface Game {
   };
 }
 
+interface CreateGamePayload {
+  name: string;
+  teams: {
+    teamA: string;
+    teamB: string;
+  };
+  scores: {
+    teamA: number;
+    teamB: number;
+  };
+  createdAt: ReturnType<typeof serverTimestamp>;
+  updatedAt: ReturnType<typeof serverTimestamp>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,7 +55,7 @@ export class ScoreboardService {
   ) as Observable<Game[]>;
 
   createGame(name: string, teamA: string, teamB: string): Promise<void> {
-    return addDoc(this.gamesCollection, {
+    return this.addGameDocument({
       name,
       teams: {
         teamA,
@@ -51,17 +65,32 @@ export class ScoreboardService {
         teamA: 0,
         teamB: 0
       },
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }).then(() => undefined);
+      createdAt: this.getTimestamp(),
+      updatedAt: this.getTimestamp()
+    });
   }
 
   updateScore(gameId: string, teamKey: 'teamA' | 'teamB', delta: number): Promise<void> {
-    const gameRef = doc(this.firestore, `games/${gameId}`);
+    return this.updateGameDocument(gameId, {
+      [`scores.${teamKey}`]: this.getIncrement(delta),
+      updatedAt: this.getTimestamp()
+    });
+  }
 
-    return updateDoc(gameRef, {
-      [`scores.${teamKey}`]: increment(delta),
-      updatedAt: serverTimestamp()
-    }).then(() => undefined);
+  protected getTimestamp() {
+    return serverTimestamp();
+  }
+
+  protected getIncrement(delta: number) {
+    return increment(delta);
+  }
+
+  protected addGameDocument(payload: CreateGamePayload): Promise<void> {
+    return addDoc(this.gamesCollection, payload).then(() => undefined);
+  }
+
+  protected updateGameDocument(gameId: string, payload: Record<string, unknown>): Promise<void> {
+    const gameRef = doc(this.firestore, `games/${gameId}`);
+    return updateDoc(gameRef, payload).then(() => undefined);
   }
 }
