@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { closeOutline } from 'ionicons/icons';
+import { RecentGame, RecentGamesService } from '../recent-games.service';
 import { ScoreboardService } from '../scoreboard.service';
 
 @Component({
@@ -10,14 +13,24 @@ import { ScoreboardService } from '../scoreboard.service';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly scoreboardService = inject(ScoreboardService);
+  private readonly recentGamesService = inject(RecentGamesService);
 
   joinCode = '';
   isCreating = false;
   createError = '';
   joinError = '';
+  recentGames: RecentGame[] = [];
+
+  constructor() {
+    addIcons({ closeOutline });
+  }
+
+  async ngOnInit(): Promise<void> {
+    this.recentGames = await this.recentGamesService.getAll();
+  }
 
   async createGame(): Promise<void> {
     if (this.isCreating) {
@@ -50,5 +63,15 @@ export class HomeComponent {
 
     this.joinError = '';
     await this.router.navigate(['/game', code]);
+  }
+
+  async openRecent(game: RecentGame): Promise<void> {
+    await this.router.navigate(['/game', game.id]);
+  }
+
+  async removeRecent(event: Event, id: string): Promise<void> {
+    event.stopPropagation();
+    await this.recentGamesService.remove(id);
+    this.recentGames = this.recentGames.filter((g) => g.id !== id);
   }
 }

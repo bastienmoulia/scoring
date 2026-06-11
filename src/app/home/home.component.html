@@ -32,4 +32,29 @@
       </ion-button>
     </ion-card-content>
   </ion-card>
+
+  @if (recentGames.length > 0) {
+    <ion-list>
+      <ion-list-header>
+        <ion-label>Parties récentes</ion-label>
+      </ion-list-header>
+
+      @for (game of recentGames; track game.id) {
+        <ion-item button detail (click)="openRecent(game)">
+          <ion-label>
+            <h3>{{ game.name }}</h3>
+            <p>{{ game.teamA }} vs {{ game.teamB }}</p>
+          </ion-label>
+          <ion-button
+            fill="clear"
+            color="medium"
+            slot="end"
+            (click)="removeRecent($event, game.id)"
+          >
+            <ion-icon name="close-outline" slot="icon-only" />
+          </ion-button>
+        </ion-item>
+      }
+    </ion-list>
+  }
 </div>

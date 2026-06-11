@@ -7,6 +7,7 @@ import { addIcons } from 'ionicons';
 import { alertCircleOutline } from 'ionicons/icons';
 import { map, switchMap, tap } from 'rxjs';
 import { Game, ScoreboardService } from '../scoreboard.service';
+import { RecentGamesService } from '../recent-games.service';
 
 @Component({
   selector: 'app-game-page',
@@ -21,6 +22,7 @@ export class GamePageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly scoreboardService = inject(ScoreboardService);
+  private readonly recentGamesService = inject(RecentGamesService);
 
   private draftInitializedFor = '';
 
@@ -33,6 +35,12 @@ export class GamePageComponent {
         this.teamA = game.teams.teamA;
         this.teamB = game.teams.teamB;
         this.draftInitializedFor = game.id;
+        void this.recentGamesService.track({
+          id: game.id,
+          name: game.name,
+          teamA: game.teams.teamA,
+          teamB: game.teams.teamB,
+        });
       }
     }),
     map((game) => ({ loaded: true, game })),
@@ -56,6 +64,12 @@ export class GamePageComponent {
     try {
       await this.scoreboardService.updateGameName(gameId, nextName);
       await this.scoreboardService.updateTeams(gameId, nextTeamA, nextTeamB);
+      await this.recentGamesService.track({
+        id: gameId,
+        name: nextName,
+        teamA: nextTeamA,
+        teamB: nextTeamB,
+      });
     } finally {
       this.isSaving = false;
     }
