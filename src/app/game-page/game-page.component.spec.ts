@@ -31,7 +31,11 @@ describe('GamePageComponent', () => {
     routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
     routerSpy.navigate.and.resolveTo(true);
 
-    const recentSpy = jasmine.createSpyObj<RecentGamesService>('RecentGamesService', ['track', 'remove', 'getAll']);
+    const recentSpy = jasmine.createSpyObj<RecentGamesService>('RecentGamesService', [
+      'track',
+      'remove',
+      'getAll',
+    ]);
     recentSpy.track.and.resolveTo();
     recentSpy.remove.and.resolveTo();
     recentSpy.getAll.and.resolveTo([]);

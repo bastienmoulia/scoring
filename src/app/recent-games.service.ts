@@ -29,10 +29,10 @@ export class RecentGamesService {
   async track(game: Omit<RecentGame, 'lastSeen'>): Promise<void> {
     const all = await this.getAll();
     const filtered = all.filter((g) => g.id !== game.id);
-    const updated: RecentGame[] = [
-      { ...game, lastSeen: Date.now() },
-      ...filtered,
-    ].slice(0, MAX_RECENT);
+    const updated: RecentGame[] = [{ ...game, lastSeen: Date.now() }, ...filtered].slice(
+      0,
+      MAX_RECENT,
+    );
     await Preferences.set({ key: STORAGE_KEY, value: JSON.stringify(updated) });
   }
 
