@@ -1,11 +1,11 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: 'YOUR_FIREBASE_API_KEY',
-    authDomain: 'YOUR_FIREBASE_AUTH_DOMAIN',
-    projectId: 'YOUR_FIREBASE_PROJECT_ID',
-    storageBucket: 'YOUR_FIREBASE_STORAGE_BUCKET',
-    messagingSenderId: 'YOUR_FIREBASE_MESSAGING_SENDER_ID',
-    appId: 'YOUR_FIREBASE_APP_ID'
-  }
+    apiKey: 'AIzaSyD2VfRqOQmaetc3dPfUJK5N49UsoGnmrgw',
+    authDomain: 'scoring-live.firebaseapp.com',
+    projectId: 'scoring-live',
+    storageBucket: 'scoring-live.firebasestorage.app',
+    messagingSenderId: '363124444228',
+    appId: '1:363124444228:web:222b49e8f13246bdb8c011',
+  },
 };

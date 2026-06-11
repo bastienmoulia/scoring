@@ -3,6 +3,8 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { alertCircleOutline } from 'ionicons/icons';
 import { map, switchMap, tap } from 'rxjs';
 import { Game, ScoreboardService } from '../scoreboard.service';
 
@@ -13,6 +15,9 @@ import { Game, ScoreboardService } from '../scoreboard.service';
   styleUrl: './game-page.component.scss',
 })
 export class GamePageComponent {
+  constructor() {
+    addIcons({ alertCircleOutline });
+  }
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly scoreboardService = inject(ScoreboardService);
@@ -30,6 +35,7 @@ export class GamePageComponent {
         this.draftInitializedFor = game.id;
       }
     }),
+    map((game) => ({ loaded: true, game })),
   );
 
   gameName = '';

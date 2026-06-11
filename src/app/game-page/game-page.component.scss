@@ -28,3 +28,23 @@ ion-card {
   text-align: center;
   font-weight: 700;
 }
+
+.not-found {
+  margin-top: 4rem;
+
+  .not-found-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-bottom: 1.5rem;
+  }
+}

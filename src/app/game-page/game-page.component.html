@@ -1,8 +1,8 @@
 <div class="game-page ion-padding">
   <ion-button fill="clear" size="small" (click)="goHome()">Retour accueil</ion-button>
 
-  @if (game$ | async; as game) {
-    @if (game) {
+  @if (game$ | async; as state) {
+    @if (state.game; as game) {
       <ion-card>
         <ion-card-header>
           <ion-card-title>Modifier la partie</ion-card-title>
@@ -73,14 +73,12 @@
         </ion-card-content>
       </ion-card>
     } @else {
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Partie introuvable</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <p>Aucune partie ne correspond a cet identifiant.</p>
-        </ion-card-content>
-      </ion-card>
+      <div class="not-found ion-padding ion-text-center">
+        <ion-icon name="alert-circle-outline" class="not-found-icon" color="medium" />
+        <h2>Partie introuvable</h2>
+        <p>Aucune partie ne correspond à cet identifiant.</p>
+        <ion-button (click)="goHome()">Retour à l'accueil</ion-button>
+      </div>
     }
   }
 </div>
