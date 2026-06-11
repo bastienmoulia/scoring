@@ -1,0 +1,86 @@
+<div class="game-page ion-padding">
+  <ion-button fill="clear" size="small" (click)="goHome()">Retour accueil</ion-button>
+
+  @if (game$ | async; as game) {
+    @if (game) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Modifier la partie</ion-card-title>
+          <ion-card-subtitle>ID: {{ game.id }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-item>
+            <ion-input label="Nom de la partie" labelPlacement="stacked" [(ngModel)]="gameName" />
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Equipe A" labelPlacement="stacked" [(ngModel)]="teamA" />
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Equipe B" labelPlacement="stacked" [(ngModel)]="teamB" />
+          </ion-item>
+
+          @if (teamA.trim() && teamB.trim() && teamA.trim() === teamB.trim()) {
+            <ion-note color="danger">Les deux equipes doivent etre differentes.</ion-note>
+          }
+
+          <ion-button
+            expand="block"
+            [disabled]="
+              isSaving ||
+              !gameName.trim() ||
+              !teamA.trim() ||
+              !teamB.trim() ||
+              teamA.trim() === teamB.trim()
+            "
+            (click)="saveGame(game.id)"
+          >
+            Enregistrer
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Scores</ion-card-title>
+          <ion-card-subtitle>{{ game.teams.teamA }} vs {{ game.teams.teamB }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="team-score-row">
+            <span class="team-name">{{ game.teams.teamA }}</span>
+            <ion-button fill="outline" size="small" (click)="changeScore(game, 'teamA', -1)"
+              >-</ion-button
+            >
+            <span class="score">{{ game.scores.teamA }}</span>
+            <ion-button fill="solid" size="small" (click)="changeScore(game, 'teamA', 1)"
+              >+</ion-button
+            >
+          </div>
+
+          <div class="team-score-row">
+            <span class="team-name">{{ game.teams.teamB }}</span>
+            <ion-button fill="outline" size="small" (click)="changeScore(game, 'teamB', -1)"
+              >-</ion-button
+            >
+            <span class="score">{{ game.scores.teamB }}</span>
+            <ion-button fill="solid" size="small" (click)="changeScore(game, 'teamB', 1)"
+              >+</ion-button
+            >
+          </div>
+        </ion-card-content>
+      </ion-card>
+    } @else {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Partie introuvable</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p>Aucune partie ne correspond a cet identifiant.</p>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
+</div>

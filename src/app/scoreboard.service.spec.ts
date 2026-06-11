@@ -10,23 +10,24 @@ describe('ScoreboardService', () => {
     const createdAt = Symbol('createdAt');
     const updatedAt = Symbol('updatedAt');
     service.getTimestamp = jasmine.createSpy().and.returnValues(createdAt, updatedAt);
-    service.addGameDocument = jasmine.createSpy().and.resolveTo();
+    service.addGameDocument = jasmine.createSpy().and.resolveTo({ id: 'game-1' });
 
-    await service.createGame('Finale', 'Lions', 'Tigers');
+    const gameId = await service.createGame('Finale', 'Lions', 'Tigers');
 
     expect(service.addGameDocument).toHaveBeenCalledWith({
       name: 'Finale',
       teams: {
         teamA: 'Lions',
-        teamB: 'Tigers'
+        teamB: 'Tigers',
       },
       scores: {
         teamA: 0,
-        teamB: 0
+        teamB: 0,
       },
       createdAt,
-      updatedAt
+      updatedAt,
     });
+    expect(gameId).toBe('game-1');
   });
 
   it('should build atomic update payload for score changes', async () => {
@@ -48,7 +49,46 @@ describe('ScoreboardService', () => {
     expect(service.getIncrement).toHaveBeenCalledWith(2);
     expect(service.updateGameDocument).toHaveBeenCalledWith('game-1', {
       'scores.teamA': incrementToken,
-      updatedAt
+      updatedAt,
+    });
+  });
+
+  it('should update game name and timestamp', async () => {
+    const service = Object.create(ScoreboardService.prototype) as ScoreboardService & {
+      updateGameDocument: jasmine.Spy;
+      getTimestamp: jasmine.Spy;
+    };
+
+    const updatedAt = Symbol('updatedAt');
+    service.getTimestamp = jasmine.createSpy().and.returnValue(updatedAt);
+    service.updateGameDocument = jasmine.createSpy().and.resolveTo();
+
+    await service.updateGameName('game-1', 'Demi-finale');
+
+    expect(service.updateGameDocument).toHaveBeenCalledWith('game-1', {
+      name: 'Demi-finale',
+      updatedAt,
+    });
+  });
+
+  it('should update teams and timestamp', async () => {
+    const service = Object.create(ScoreboardService.prototype) as ScoreboardService & {
+      updateGameDocument: jasmine.Spy;
+      getTimestamp: jasmine.Spy;
+    };
+
+    const updatedAt = Symbol('updatedAt');
+    service.getTimestamp = jasmine.createSpy().and.returnValue(updatedAt);
+    service.updateGameDocument = jasmine.createSpy().and.resolveTo();
+
+    await service.updateTeams('game-1', 'Lions', 'Wolves');
+
+    expect(service.updateGameDocument).toHaveBeenCalledWith('game-1', {
+      teams: {
+        teamA: 'Lions',
+        teamB: 'Wolves',
+      },
+      updatedAt,
     });
   });
 });
