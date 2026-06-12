@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,5 +9,17 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
 })
 export class App {
+  private readonly router = inject(Router);
+
   readonly title = 'Scoring Live';
+
+  get isHomeRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    return url === '/' || url === '/home';
+  }
+
+  get isGameRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    return url.startsWith('/game/');
+  }
 }

@@ -1,6 +1,4 @@
 <div class="game-page ion-padding">
-  <ion-button fill="clear" size="small" (click)="goHome()">Retour accueil</ion-button>
-
   @if (game$ | async; as state) {
     @if (state.game; as game) {
       <ion-card>

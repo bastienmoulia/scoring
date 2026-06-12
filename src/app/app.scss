@@ -1,3 +1,17 @@
 :host {
   display: block;
 }
+
+ion-toolbar {
+  position: relative;
+}
+
+.app-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  pointer-events: none;
+}

@@ -1,4 +1,8 @@
 <div class="home-container ion-padding">
+  <div class="home-title-wrap">
+    <h1>Scoring Live</h1>
+  </div>
+
   <ion-card>
     <ion-card-header>
       <ion-card-title>Accueil</ion-card-title>
@@ -36,7 +40,7 @@
   @if (recentGames.length > 0) {
     <ion-list>
       <ion-list-header>
-        <ion-label>Parties récentes</ion-label>
+        <ion-label>Mes parties récentes</ion-label>
       </ion-list-header>
 
       @for (game of recentGames; track game.id) {
