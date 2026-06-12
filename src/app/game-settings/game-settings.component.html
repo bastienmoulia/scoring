@@ -1,0 +1,54 @@
+<div class="game-settings ion-padding">
+  @if (game$ | async; as state) {
+    @if (state.game; as game) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Reglages de la partie</ion-card-title>
+          <ion-card-subtitle>ID: {{ game.id }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-item>
+            <ion-input label="Nom de la partie" labelPlacement="stacked" [(ngModel)]="gameName" />
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Equipe A" labelPlacement="stacked" [(ngModel)]="teamA" />
+          </ion-item>
+
+          <ion-item>
+            <ion-input label="Equipe B" labelPlacement="stacked" [(ngModel)]="teamB" />
+          </ion-item>
+
+          @if (teamA.trim() && teamB.trim() && teamA.trim() === teamB.trim()) {
+            <ion-note color="danger">Les deux equipes doivent etre differentes.</ion-note>
+          }
+
+          <ion-button
+            expand="block"
+            [disabled]="
+              isSaving ||
+              !gameName.trim() ||
+              !teamA.trim() ||
+              !teamB.trim() ||
+              teamA.trim() === teamB.trim()
+            "
+            (click)="saveGame(game.id)"
+          >
+            Enregistrer
+          </ion-button>
+
+          <ion-button expand="block" fill="clear" (click)="goBack(game.id)">
+            Retour au score
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    } @else {
+      <div class="not-found ion-padding ion-text-center">
+        <h2>Partie introuvable</h2>
+        <p>Aucune partie ne correspond a cet identifiant.</p>
+        <ion-button routerLink="/home">Retour a l'accueil</ion-button>
+      </div>
+    }
+  }
+</div>
