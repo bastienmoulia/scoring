@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { map, switchMap, tap } from 'rxjs';
 import { RecentGamesService } from '../recent-games.service';
-import { ScoreboardService } from '../scoreboard.service';
+import { ScoreboardService, Team } from '../scoreboard.service';
 
 @Component({
   selector: 'app-game-settings',
@@ -27,8 +27,7 @@ export class GameSettingsComponent {
     tap((game) => {
       if (game && this.draftInitializedFor !== game.id) {
         this.gameName = game.name;
-        this.teamA = game.teams.teamA;
-        this.teamB = game.teams.teamB;
+        this.teams = game.teams.map((team) => ({ ...team }));
         this.draftInitializedFor = game.id;
       }
     }),
@@ -36,28 +35,34 @@ export class GameSettingsComponent {
   );
 
   gameName = '';
-  teamA = '';
-  teamB = '';
+  teams: Team[] = [];
   isSaving = false;
 
   async saveGame(gameId: string): Promise<void> {
     const nextName = this.gameName.trim();
-    const nextTeamA = this.teamA.trim();
-    const nextTeamB = this.teamB.trim();
+    const nextTeams = this.teams.map((team) => ({
+      ...team,
+      name: team.name.trim(),
+    }));
+    const uniqueNames = new Set(nextTeams.map((team) => team.name.toLowerCase()));
 
-    if (!nextName || !nextTeamA || !nextTeamB || this.isSaving || nextTeamA === nextTeamB) {
+    if (
+      this.isSaving ||
+      nextTeams.length === 0 ||
+      nextTeams.some((team) => !team.name) ||
+      uniqueNames.size !== nextTeams.length
+    ) {
       return;
     }
 
     this.isSaving = true;
     try {
       await this.scoreboardService.updateGameName(gameId, nextName);
-      await this.scoreboardService.updateTeams(gameId, nextTeamA, nextTeamB);
+      await this.scoreboardService.updateTeams(gameId, nextTeams);
       await this.recentGamesService.track({
         id: gameId,
         name: nextName,
-        teamA: nextTeamA,
-        teamB: nextTeamB,
+        teams: nextTeams,
       });
       await this.router.navigate(['/game', gameId]);
     } finally {
@@ -65,7 +70,43 @@ export class GameSettingsComponent {
     }
   }
 
+  addTeam(): void {
+    this.teams = [
+      ...this.teams,
+      {
+        name: '',
+        color: '#10dc60',
+        score: 0,
+      },
+    ];
+  }
+
+  canRemoveTeam(): boolean {
+    return this.teams.length > 2;
+  }
+
+  removeTeam(index: number): void {
+    if (!this.canRemoveTeam()) {
+      return;
+    }
+
+    this.teams = this.teams.filter((_, currentIndex) => currentIndex !== index);
+  }
+
+  hasDuplicateTeamNames(): boolean {
+    const names = this.teams.map((team) => team.name.trim().toLowerCase()).filter(Boolean);
+    return new Set(names).size !== names.length;
+  }
+
+  hasBlankTeamNames(): boolean {
+    return this.teams.some((team) => !team.name.trim());
+  }
+
   async goBack(gameId: string): Promise<void> {
     await this.router.navigate(['/game', gameId]);
+  }
+
+  async goHome(): Promise<void> {
+    await this.router.navigate(['/home']);
   }
 }

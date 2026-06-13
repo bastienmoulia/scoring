@@ -5,7 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { alertCircleOutline } from 'ionicons/icons';
 import { map, switchMap, tap } from 'rxjs';
-import { Game, ScoreboardService } from '../scoreboard.service';
+import { Game, ScoreboardService, Team } from '../scoreboard.service';
 import { RecentGamesService } from '../recent-games.service';
 
 @Component({
@@ -31,16 +31,28 @@ export class GameComponent {
         void this.recentGamesService.track({
           id: game.id,
           name: game.name,
-          teamA: game.teams.teamA,
-          teamB: game.teams.teamB,
+          teams: game.teams,
         });
       }
     }),
     map((game) => ({ loaded: true, game })),
   );
 
-  async changeScore(game: Game, teamKey: 'teamA' | 'teamB', delta: number): Promise<void> {
-    await this.scoreboardService.updateScore(game.id, teamKey, delta);
+  async changeScore(game: Game, teamIndex: number, delta: number): Promise<void> {
+    const team = game.teams[teamIndex];
+    if (!team) {
+      return;
+    }
+
+    await this.scoreboardService.updateScore(game.id, teamIndex, delta, game.teams);
+  }
+
+  displayGameName(game: Game): string {
+    return game.name.trim() || this.formatTeams(game.teams);
+  }
+
+  trackTeam(index: number, team: Team): string {
+    return `${index}-${team.name}-${team.color}`;
   }
 
   async goSettings(gameId: string): Promise<void> {
@@ -49,5 +61,9 @@ export class GameComponent {
 
   async goHome(): Promise<void> {
     await this.router.navigate(['/home']);
+  }
+
+  private formatTeams(teams: Team[]): string {
+    return teams.map((team) => team.name || 'Equipe sans nom').join(' vs ');
   }
 }

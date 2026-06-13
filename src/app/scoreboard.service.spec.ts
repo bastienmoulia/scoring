@@ -1,54 +1,99 @@
 import { ScoreboardService } from './scoreboard.service';
 
 describe('ScoreboardService', () => {
-  it('should create game payload with initial scores and timestamps', async () => {
+  it('should create game with a generated short id', async () => {
     const service = Object.create(ScoreboardService.prototype) as ScoreboardService & {
-      addGameDocument: jasmine.Spy;
+      generateShortGameId: jasmine.Spy;
+      gameDocumentExists: jasmine.Spy;
+      setGameDocument: jasmine.Spy;
       getTimestamp: jasmine.Spy;
     };
 
     const createdAt = Symbol('createdAt');
     const updatedAt = Symbol('updatedAt');
+    service.generateShortGameId = jasmine.createSpy().and.returnValue('ABCD2345');
+    service.gameDocumentExists = jasmine.createSpy().and.resolveTo(false);
+    service.setGameDocument = jasmine.createSpy().and.resolveTo();
     service.getTimestamp = jasmine.createSpy().and.returnValues(createdAt, updatedAt);
-    service.addGameDocument = jasmine.createSpy().and.resolveTo({ id: 'game-1' });
 
-    const gameId = await service.createGame('Finale', 'Lions', 'Tigers');
+    const teams = [
+      { name: 'Lions', color: '#0054e9', score: 0 },
+      { name: 'Tigers', color: '#eb445a', score: 0 },
+    ];
 
-    expect(service.addGameDocument).toHaveBeenCalledWith({
+    const gameId = await service.createGame('Finale', teams);
+
+    expect(service.generateShortGameId).toHaveBeenCalled();
+    expect(service.gameDocumentExists).toHaveBeenCalledWith('ABCD2345');
+    expect(service.setGameDocument).toHaveBeenCalledWith('ABCD2345', {
       name: 'Finale',
-      teams: {
-        teamA: 'Lions',
-        teamB: 'Tigers',
-      },
-      scores: {
-        teamA: 0,
-        teamB: 0,
-      },
+      teams,
       createdAt,
       updatedAt,
     });
-    expect(gameId).toBe('game-1');
+    expect(gameId).toBe('ABCD2345');
+  });
+
+  it('should retry id generation when collision occurs', async () => {
+    const service = Object.create(ScoreboardService.prototype) as ScoreboardService & {
+      generateShortGameId: jasmine.Spy;
+      gameDocumentExists: jasmine.Spy;
+      setGameDocument: jasmine.Spy;
+      getTimestamp: jasmine.Spy;
+    };
+
+    const createdAt = Symbol('createdAt');
+    const updatedAt = Symbol('updatedAt');
+    service.generateShortGameId = jasmine.createSpy().and.returnValues('DUPLICAT', 'UNIQUE12');
+    service.gameDocumentExists = jasmine
+      .createSpy()
+      .and.returnValues(Promise.resolve(true), Promise.resolve(false));
+    service.setGameDocument = jasmine.createSpy().and.resolveTo();
+    service.getTimestamp = jasmine.createSpy().and.returnValues(createdAt, updatedAt);
+
+    const teams = [
+      { name: 'Lions', color: '#0054e9', score: 0 },
+      { name: 'Tigers', color: '#eb445a', score: 0 },
+    ];
+
+    const gameId = await service.createGame('Finale', teams);
+
+    expect(service.generateShortGameId).toHaveBeenCalledTimes(2);
+    expect(service.gameDocumentExists).toHaveBeenCalledWith('DUPLICAT');
+    expect(service.gameDocumentExists).toHaveBeenCalledWith('UNIQUE12');
+    expect(service.setGameDocument).toHaveBeenCalledTimes(1);
+    expect(service.setGameDocument).toHaveBeenCalledWith('UNIQUE12', {
+      name: 'Finale',
+      teams,
+      createdAt,
+      updatedAt,
+    });
+    expect(gameId).toBe('UNIQUE12');
   });
 
   it('should build atomic update payload for score changes', async () => {
     const service = Object.create(ScoreboardService.prototype) as ScoreboardService & {
       updateGameDocument: jasmine.Spy;
-      getIncrement: jasmine.Spy;
       getTimestamp: jasmine.Spy;
     };
 
-    const incrementToken = Symbol('incrementToken');
     const updatedAt = Symbol('updatedAt');
 
-    service.getIncrement = jasmine.createSpy().and.returnValue(incrementToken);
     service.getTimestamp = jasmine.createSpy().and.returnValue(updatedAt);
     service.updateGameDocument = jasmine.createSpy().and.resolveTo();
 
-    await service.updateScore('game-1', 'teamA', 2);
+    const teams = [
+      { name: 'Lions', color: '#0054e9', score: 3 },
+      { name: 'Tigers', color: '#eb445a', score: 1 },
+    ];
 
-    expect(service.getIncrement).toHaveBeenCalledWith(2);
+    await service.updateScore('game-1', 0, 2, teams);
+
     expect(service.updateGameDocument).toHaveBeenCalledWith('game-1', {
-      'scores.teamA': incrementToken,
+      teams: [
+        { name: 'Lions', color: '#0054e9', score: 5 },
+        { name: 'Tigers', color: '#eb445a', score: 1 },
+      ],
       updatedAt,
     });
   });
@@ -81,14 +126,38 @@ describe('ScoreboardService', () => {
     service.getTimestamp = jasmine.createSpy().and.returnValue(updatedAt);
     service.updateGameDocument = jasmine.createSpy().and.resolveTo();
 
-    await service.updateTeams('game-1', 'Lions', 'Wolves');
+    const teams = [
+      { name: 'Lions', color: '#0054e9', score: 0 },
+      { name: 'Wolves', color: '#10dc60', score: 0 },
+    ];
+
+    await service.updateTeams('game-1', teams);
 
     expect(service.updateGameDocument).toHaveBeenCalledWith('game-1', {
-      teams: {
-        teamA: 'Lions',
-        teamB: 'Wolves',
-      },
+      teams,
       updatedAt,
     });
+  });
+
+  it('should normalize legacy game documents to the new team model', () => {
+    const service = Object.create(ScoreboardService.prototype) as any;
+
+    const normalized = service.normalizeGame({
+      id: 'game-1',
+      name: 'Finale',
+      teams: {
+        teamA: 'Lions',
+        teamB: 'Tigers',
+      },
+      scores: {
+        teamA: 3,
+        teamB: 1,
+      },
+    }) as { teams: Array<{ name: string; color: string; score: number }> };
+
+    expect(normalized.teams).toEqual([
+      { name: 'Lions', color: '#0054e9', score: 3 },
+      { name: 'Tigers', color: '#eb445a', score: 1 },
+    ]);
   });
 });

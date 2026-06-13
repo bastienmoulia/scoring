@@ -5,7 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { closeOutline } from 'ionicons/icons';
 import { RecentGame, RecentGamesService } from '../recent-games.service';
-import { ScoreboardService } from '../scoreboard.service';
+import { ScoreboardService, Team } from '../scoreboard.service';
 
 @Component({
   selector: 'app-home',
@@ -42,8 +42,7 @@ export class HomeComponent implements OnInit {
     try {
       const gameId = await this.scoreboardService.createGame(
         this.scoreboardService.defaultGameName,
-        this.scoreboardService.defaultTeamA,
-        this.scoreboardService.defaultTeamB,
+        this.scoreboardService.defaultTeams.map((team) => ({ ...team })),
       );
 
       await this.router.navigate(['/game', gameId]);
@@ -55,7 +54,7 @@ export class HomeComponent implements OnInit {
   }
 
   async joinGame(): Promise<void> {
-    const code = this.joinCode.trim();
+    const code = this.joinCode.trim().toUpperCase();
     if (!code) {
       this.joinError = 'Saisissez un identifiant de partie.';
       return;
@@ -67,6 +66,10 @@ export class HomeComponent implements OnInit {
 
   async openRecent(game: RecentGame): Promise<void> {
     await this.router.navigate(['/game', game.id]);
+  }
+
+  formatTeams(teams: Team[]): string {
+    return teams.map((team) => team.name || 'Equipe sans nom').join(' vs ');
   }
 
   async removeRecent(event: Event, id: string): Promise<void> {

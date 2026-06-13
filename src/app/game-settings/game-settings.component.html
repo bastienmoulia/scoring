@@ -3,7 +3,7 @@
     @if (state.game; as game) {
       <ion-card>
         <ion-card-header>
-          <ion-card-title>Reglages de la partie</ion-card-title>
+          <ion-card-title>Réglages de la partie</ion-card-title>
           <ion-card-subtitle>ID: {{ game.id }}</ion-card-subtitle>
         </ion-card-header>
 
@@ -12,26 +12,47 @@
             <ion-input label="Nom de la partie" labelPlacement="stacked" [(ngModel)]="gameName" />
           </ion-item>
 
-          <ion-item>
-            <ion-input label="Equipe A" labelPlacement="stacked" [(ngModel)]="teamA" />
-          </ion-item>
+          <div class="teams-list">
+            @for (team of teams; track $index) {
+              <div class="team-settings-row">
+                <ion-item>
+                  <ion-input label="Equipe" labelPlacement="stacked" [(ngModel)]="team.name" />
+                </ion-item>
 
-          <ion-item>
-            <ion-input label="Equipe B" labelPlacement="stacked" [(ngModel)]="teamB" />
-          </ion-item>
+                <ion-item>
+                  <ion-input
+                    class="team-color-input"
+                    type="color"
+                    label="Couleur"
+                    labelPlacement="stacked"
+                    [(ngModel)]="team.color"
+                  />
+                </ion-item>
 
-          @if (teamA.trim() && teamB.trim() && teamA.trim() === teamB.trim()) {
-            <ion-note color="danger">Les deux equipes doivent etre differentes.</ion-note>
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  [disabled]="!canRemoveTeam()"
+                  (click)="removeTeam($index)"
+                >
+                  Retirer
+                </ion-button>
+              </div>
+            }
+          </div>
+
+          @if (hasDuplicateTeamNames()) {
+            <ion-note color="danger">Les noms d'equipes doivent etre uniques.</ion-note>
           }
+
+          <ion-button expand="block" fill="outline" (click)="addTeam()"
+            >Ajouter une equipe</ion-button
+          >
 
           <ion-button
             expand="block"
             [disabled]="
-              isSaving ||
-              !gameName.trim() ||
-              !teamA.trim() ||
-              !teamB.trim() ||
-              teamA.trim() === teamB.trim()
+              isSaving || teams.length === 0 || hasDuplicateTeamNames() || hasBlankTeamNames()
             "
             (click)="saveGame(game.id)"
           >
@@ -47,7 +68,7 @@
       <div class="not-found ion-padding ion-text-center">
         <h2>Partie introuvable</h2>
         <p>Aucune partie ne correspond a cet identifiant.</p>
-        <ion-button routerLink="/home">Retour a l'accueil</ion-button>
+        <ion-button (click)="goHome()">Retour a l'accueil</ion-button>
       </div>
     }
   }

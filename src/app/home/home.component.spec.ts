@@ -5,8 +5,24 @@ import { ScoreboardService } from '../scoreboard.service';
 import { RecentGame, RecentGamesService } from '../recent-games.service';
 
 const RECENT_MOCK: RecentGame[] = [
-  { id: 'g1', name: 'Finale', teamA: 'Lions', teamB: 'Tigers', lastSeen: 1000 },
-  { id: 'g2', name: 'Demi', teamA: 'Bears', teamB: 'Wolves', lastSeen: 900 },
+  {
+    id: 'g1',
+    name: 'Finale',
+    teams: [
+      { name: 'Lions', color: '#0054e9', score: 3 },
+      { name: 'Tigers', color: '#eb445a', score: 1 },
+    ],
+    lastSeen: 1000,
+  },
+  {
+    id: 'g2',
+    name: 'Demi',
+    teams: [
+      { name: 'Bears', color: '#5260ff', score: 2 },
+      { name: 'Wolves', color: '#10dc60', score: 2 },
+    ],
+    lastSeen: 900,
+  },
 ];
 
 describe('HomeComponent', () => {
@@ -16,9 +32,11 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     serviceSpy = jasmine.createSpyObj<ScoreboardService>('ScoreboardService', ['createGame'], {
-      defaultGameName: 'Nouvelle partie',
-      defaultTeamA: 'Lions',
-      defaultTeamB: 'Tigers',
+      defaultGameName: '',
+      defaultTeams: [
+        { name: 'Equipe A', color: '#0054e9', score: 0 },
+        { name: 'Equipe B', color: '#eb445a', score: 0 },
+      ],
     });
     routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
     routerSpy.navigate.and.resolveTo(true);
@@ -61,7 +79,10 @@ describe('HomeComponent', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     await fixture.componentInstance.createGame();
 
-    expect(serviceSpy.createGame).toHaveBeenCalledWith('Nouvelle partie', 'Lions', 'Tigers');
+    expect(serviceSpy.createGame).toHaveBeenCalledWith('', [
+      { name: 'Equipe A', color: '#0054e9', score: 0 },
+      { name: 'Equipe B', color: '#eb445a', score: 0 },
+    ]);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/game', 'game-abc']);
   });
 
@@ -95,7 +116,7 @@ describe('HomeComponent', () => {
     component.joinCode = 'xyz789';
     await component.joinGame();
 
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/game', 'xyz789']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/game', 'XYZ789']);
     expect(component.joinError).toBe('');
   });
 
@@ -128,5 +149,10 @@ describe('HomeComponent', () => {
     expect(recentSpy.remove).toHaveBeenCalledWith('g1');
     expect(component.recentGames.find((g) => g.id === 'g1')).toBeUndefined();
     expect(component.recentGames.length).toBe(1);
+  });
+
+  it('should format teams for display', () => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    expect(fixture.componentInstance.formatTeams(RECENT_MOCK[0].teams)).toBe('Lions vs Tigers');
   });
 });

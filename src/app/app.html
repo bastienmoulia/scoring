@@ -6,6 +6,13 @@
           <ion-back-button defaultHref="/home" text="" />
         </ion-buttons>
         <ion-title class="app-title">{{ title }}</ion-title>
+        @if (settingsUrl) {
+          <ion-buttons slot="end">
+            <ion-button (click)="goSettings()">
+              <ion-icon slot="icon-only" name="settings-outline" />
+            </ion-button>
+          </ion-buttons>
+        }
       </ion-toolbar>
     </ion-header>
   }

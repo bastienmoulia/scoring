@@ -2,14 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { GameComponent } from './game.component';
-import { Game, ScoreboardService } from '../scoreboard.service';
+import { Game, ScoreboardService, Team } from '../scoreboard.service';
 import { RecentGamesService } from '../recent-games.service';
 
 const MOCK_GAME: Game = {
   id: 'game-1',
   name: 'Finale',
-  teams: { teamA: 'Lions', teamB: 'Tigers' },
-  scores: { teamA: 3, teamB: 1 },
+  teams: [
+    { name: 'Lions', color: '#0054e9', score: 3 },
+    { name: 'Tigers', color: '#eb445a', score: 1 },
+  ],
 };
 
 describe('GameComponent', () => {
@@ -68,8 +70,7 @@ describe('GameComponent', () => {
       expect(recentSpy.track).toHaveBeenCalledWith({
         id: 'game-1',
         name: 'Finale',
-        teamA: 'Lions',
-        teamB: 'Tigers',
+        teams: MOCK_GAME.teams,
       });
       done();
     });
@@ -77,9 +78,9 @@ describe('GameComponent', () => {
 
   it('should call updateScore when changeScore is invoked', async () => {
     const fixture = createComponent(MOCK_GAME);
-    await fixture.componentInstance.changeScore(MOCK_GAME, 'teamA', 1);
+    await fixture.componentInstance.changeScore(MOCK_GAME, 0, 1);
 
-    expect(serviceSpy.updateScore).toHaveBeenCalledWith('game-1', 'teamA', 1);
+    expect(serviceSpy.updateScore).toHaveBeenCalledWith('game-1', 0, 1, MOCK_GAME.teams);
   });
 
   it('should navigate home on goHome', async () => {
@@ -94,6 +95,13 @@ describe('GameComponent', () => {
     await fixture.componentInstance.goSettings('game-1');
 
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/game', 'game-1', 'settings']);
+  });
+
+  it('should display fallback game name from teams when game name is empty', () => {
+    const fixture = createComponent({ ...MOCK_GAME, name: '' });
+    expect(fixture.componentInstance.displayGameName({ ...MOCK_GAME, name: '' })).toBe(
+      'Lions vs Tigers',
+    );
   });
 
   it('should emit game undefined wrapped in loaded object when game is not found', (done) => {

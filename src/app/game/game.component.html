@@ -3,45 +3,24 @@
     @if (state.game; as game) {
       <ion-card>
         <ion-card-header>
-          <ion-card-title>{{ game.name }}</ion-card-title>
-          <ion-card-subtitle>ID: {{ game.id }}</ion-card-subtitle>
+          <ion-card-title>{{ displayGameName(game) }}</ion-card-title>
         </ion-card-header>
 
         <ion-card-content>
-          <ion-button expand="block" fill="outline" (click)="goSettings(game.id)">
-            Reglages de la partie
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Scores</ion-card-title>
-          <ion-card-subtitle>{{ game.teams.teamA }} vs {{ game.teams.teamB }}</ion-card-subtitle>
-        </ion-card-header>
-
-        <ion-card-content>
-          <div class="team-score-row">
-            <span class="team-name">{{ game.teams.teamA }}</span>
-            <ion-button fill="outline" size="small" (click)="changeScore(game, 'teamA', -1)"
-              >-</ion-button
-            >
-            <span class="score">{{ game.scores.teamA }}</span>
-            <ion-button fill="solid" size="small" (click)="changeScore(game, 'teamA', 1)"
-              >+</ion-button
-            >
-          </div>
-
-          <div class="team-score-row">
-            <span class="team-name">{{ game.teams.teamB }}</span>
-            <ion-button fill="outline" size="small" (click)="changeScore(game, 'teamB', -1)"
-              >-</ion-button
-            >
-            <span class="score">{{ game.scores.teamB }}</span>
-            <ion-button fill="solid" size="small" (click)="changeScore(game, 'teamB', 1)"
-              >+</ion-button
-            >
-          </div>
+          @for (team of game.teams; track trackTeam($index, team)) {
+            <div class="team-score-row">
+              <span class="team-name" [style.color]="team.color">{{
+                team.name || 'Equipe sans nom'
+              }}</span>
+              <ion-button fill="outline" size="small" (click)="changeScore(game, $index, -1)"
+                >-</ion-button
+              >
+              <span class="score" [style.color]="team.color">{{ team.score }}</span>
+              <ion-button fill="solid" size="small" (click)="changeScore(game, $index, 1)"
+                >+</ion-button
+              >
+            </div>
+          }
         </ion-card-content>
       </ion-card>
     } @else {

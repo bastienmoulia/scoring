@@ -24,4 +24,11 @@ ion-card {
 
 .join-input {
   margin-top: 1rem;
+  --min-height: 4.25rem;
+}
+
+.join-input ion-input {
+  font-size: 1.15rem;
+  --padding-top: 0.8rem;
+  --padding-bottom: 0.8rem;
 }

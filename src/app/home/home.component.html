@@ -23,7 +23,8 @@
           label="Code de partie"
           labelPlacement="stacked"
           [(ngModel)]="joinCode"
-          placeholder="Ex: abc123"
+          placeholder="Ex: AB3K9Q2L"
+          maxlength="8"
         />
       </ion-item>
 
@@ -46,8 +47,8 @@
       @for (game of recentGames; track game.id) {
         <ion-item button detail (click)="openRecent(game)">
           <ion-label>
-            <h3>{{ game.name }}</h3>
-            <p>{{ game.teamA }} vs {{ game.teamB }}</p>
+            <h3>{{ game.name || 'Partie sans nom' }}</h3>
+            <p>{{ formatTeams(game.teams) }}</p>
           </ion-label>
           <ion-button
             fill="clear"

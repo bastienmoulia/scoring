@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
+import { Team } from './scoreboard.service';
 
 export interface RecentGame {
   id: string;
   name: string;
-  teamA: string;
-  teamB: string;
+  teams: Team[];
   lastSeen: number;
 }
 

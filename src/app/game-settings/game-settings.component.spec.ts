@@ -8,8 +8,10 @@ import { Game, ScoreboardService } from '../scoreboard.service';
 const MOCK_GAME: Game = {
   id: 'game-1',
   name: 'Finale',
-  teams: { teamA: 'Lions', teamB: 'Tigers' },
-  scores: { teamA: 3, teamB: 1 },
+  teams: [
+    { name: 'Lions', color: '#0054e9', score: 3 },
+    { name: 'Tigers', color: '#eb445a', score: 1 },
+  ],
 };
 
 describe('GameSettingsComponent', () => {
@@ -62,8 +64,7 @@ describe('GameSettingsComponent', () => {
 
     component.game$.subscribe(() => {
       expect(component.gameName).toBe('Finale');
-      expect(component.teamA).toBe('Lions');
-      expect(component.teamB).toBe('Tigers');
+      expect(component.teams).toEqual(MOCK_GAME.teams);
       done();
     });
   });
@@ -75,19 +76,67 @@ describe('GameSettingsComponent', () => {
     await new Promise<void>((resolve) => component.game$.subscribe(() => resolve()));
 
     component.gameName = 'Finale modifiee';
-    component.teamA = 'Lions';
-    component.teamB = 'Eagles';
+    component.teams = [
+      { name: 'Lions', color: '#0054e9', score: 3 },
+      { name: 'Eagles', color: '#10dc60', score: 1 },
+    ];
 
     await component.saveGame('game-1');
 
     expect(serviceSpy.updateGameName).toHaveBeenCalledWith('game-1', 'Finale modifiee');
-    expect(serviceSpy.updateTeams).toHaveBeenCalledWith('game-1', 'Lions', 'Eagles');
+    expect(serviceSpy.updateTeams).toHaveBeenCalledWith('game-1', component.teams);
     expect(recentSpy.track).toHaveBeenCalledWith({
       id: 'game-1',
       name: 'Finale modifiee',
-      teamA: 'Lions',
-      teamB: 'Eagles',
+      teams: component.teams,
     });
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/game', 'game-1']);
+  });
+
+  it('should save empty name to firebase when gameName is cleared', async () => {
+    const fixture = createComponent(MOCK_GAME);
+    const component = fixture.componentInstance;
+
+    await new Promise<void>((resolve) => component.game$.subscribe(() => resolve()));
+
+    component.gameName = '';
+    component.teams = [
+      { name: 'Lions', color: '#0054e9', score: 3 },
+      { name: 'Eagles', color: '#10dc60', score: 1 },
+    ];
+
+    await component.saveGame('game-1');
+
+    expect(serviceSpy.updateGameName).toHaveBeenCalledWith('game-1', '');
+    expect(serviceSpy.updateTeams).toHaveBeenCalledWith('game-1', component.teams);
+    expect(recentSpy.track).toHaveBeenCalledWith({
+      id: 'game-1',
+      name: '',
+      teams: component.teams,
+    });
+  });
+
+  it('should add and remove teams', () => {
+    const fixture = createComponent(MOCK_GAME);
+    const component = fixture.componentInstance;
+
+    component.teams = [...MOCK_GAME.teams];
+    component.addTeam();
+    expect(component.teams.length).toBe(3);
+
+    component.removeTeam(1);
+    expect(component.teams.length).toBe(2);
+  });
+
+  it('should not remove a team when only two remain', () => {
+    const fixture = createComponent(MOCK_GAME);
+    const component = fixture.componentInstance;
+
+    component.teams = [...MOCK_GAME.teams];
+    expect(component.canRemoveTeam()).toBeFalse();
+
+    component.removeTeam(0);
+
+    expect(component.teams).toEqual(MOCK_GAME.teams);
   });
 });
