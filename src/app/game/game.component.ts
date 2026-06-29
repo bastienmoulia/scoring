@@ -55,6 +55,20 @@ export class GameComponent {
     return `${index}-${team.name}-${team.color}`;
   }
 
+  getContrastColor(color: string): string {
+    const rgb = this.parseHexColor(color);
+    if (!rgb) {
+      return '#ffffff';
+    }
+
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    return luminance > 0.6 ? '#111111' : '#ffffff';
+  }
+
+  getInverseContrastColor(color: string): string {
+    return this.getContrastColor(color) === '#111111' ? '#ffffff' : '#111111';
+  }
+
   async goSettings(gameId: string): Promise<void> {
     await this.router.navigate(['/game', gameId, 'settings']);
   }
@@ -65,5 +79,28 @@ export class GameComponent {
 
   private formatTeams(teams: Team[]): string {
     return teams.map((team) => team.name || 'Equipe sans nom').join(' vs ');
+  }
+
+  private parseHexColor(color: string): { r: number; g: number; b: number } | null {
+    const hex = color.trim();
+    const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex);
+
+    if (!match) {
+      return null;
+    }
+
+    const normalizedHex =
+      match[1].length === 3
+        ? `#${match[1]
+            .split('')
+            .map((char) => `${char}${char}`)
+            .join('')}`
+        : hex;
+
+    return {
+      r: Number.parseInt(normalizedHex.slice(1, 3), 16),
+      g: Number.parseInt(normalizedHex.slice(3, 5), 16),
+      b: Number.parseInt(normalizedHex.slice(5, 7), 16),
+    };
   }
 }

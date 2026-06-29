@@ -113,4 +113,22 @@ describe('GameComponent', () => {
       done();
     });
   });
+
+  it('should return dark contrast color for light backgrounds', () => {
+    const fixture = createComponent(MOCK_GAME);
+    expect(fixture.componentInstance.getContrastColor('#ffffff')).toBe('#111111');
+  });
+
+  it('should return light contrast color for dark backgrounds and short hex', () => {
+    const fixture = createComponent(MOCK_GAME);
+    expect(fixture.componentInstance.getContrastColor('#0054e9')).toBe('#ffffff');
+    expect(fixture.componentInstance.getContrastColor('#000')).toBe('#ffffff');
+  });
+
+  it('should fallback safely for invalid colors and inverse contrast should match', () => {
+    const fixture = createComponent(MOCK_GAME);
+    expect(fixture.componentInstance.getContrastColor('not-a-color')).toBe('#ffffff');
+    expect(fixture.componentInstance.getInverseContrastColor('#ffffff')).toBe('#ffffff');
+    expect(fixture.componentInstance.getInverseContrastColor('#000000')).toBe('#111111');
+  });
 });

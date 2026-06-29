@@ -1,32 +1,99 @@
 :host {
-  display: block;
+  display: flex;
+  height: 100%;
 }
 
-.game {
-  max-width: 760px;
-  margin: 0 auto;
+.game-container {
+  display: flex;
+  flex: 1;
+  container-type: size;
 }
 
-ion-card {
-  margin-top: 1rem;
+.game-found {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
 }
 
 .team-score-row {
+  --team-contrast: #ffffff;
+  --team-contrast-inverse: #111111;
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
-  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 3fr;
+  grid-template-areas:
+    'name name name'
+    'minus score plus';
   align-items: center;
-  margin-bottom: 0.5rem;
+  justify-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.75rem;
+  gap: 0.5rem;
+  container-type: size;
+}
+
+@container (max-aspect-ratio: 1/1) {
+  .game-found {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .team-score-row {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+  }
 }
 
 .team-name {
+  grid-area: name;
+  align-self: center;
+  justify-self: center;
+  color: var(--team-contrast);
+  text-align: center;
   font-weight: 600;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .score {
-  min-width: 2rem;
+  grid-area: score;
+  color: var(--team-contrast);
+  min-width: 0;
   text-align: center;
   font-weight: 700;
+  line-height: 1;
+  font-size: clamp(2rem, min(24cqi, 24cqb), 7rem);
+}
+
+.score-action {
+  align-self: center;
+  justify-self: center;
+  --padding-start: 0.9rem;
+  --padding-end: 0.9rem;
+  --padding-top: 0.5rem;
+  --padding-bottom: 0.5rem;
+}
+
+.score-action-minus {
+  grid-area: minus;
+  justify-self: end;
+  --color: var(--team-contrast);
+  --border-color: var(--team-contrast);
+  --background: transparent;
+}
+
+.score-action-plus {
+  grid-area: plus;
+  justify-self: start;
+  --background: var(--team-contrast);
+  --color: var(--team-contrast-inverse);
+  --border-color: var(--team-contrast);
 }
 
 .not-found {

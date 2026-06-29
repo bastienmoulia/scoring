@@ -22,9 +22,17 @@ ion-card {
   gap: 0.75rem;
 }
 
+.team-color-item {
+  --inner-padding-bottom: 0.35rem;
+}
+
 .team-color-input {
-  --padding-top: 0.5rem;
-  --padding-bottom: 0.5rem;
+  width: 100%;
+  min-height: 3.5rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
 }
 
 .not-found {

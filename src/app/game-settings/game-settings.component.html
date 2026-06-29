@@ -19,12 +19,14 @@
                   <ion-input label="Equipe" labelPlacement="stacked" [(ngModel)]="team.name" />
                 </ion-item>
 
-                <ion-item>
-                  <ion-input
+                <ion-item class="team-color-item">
+                  <ion-label position="stacked" [attr.for]="'team-color-' + $index"
+                    >Couleur</ion-label
+                  >
+                  <input
                     class="team-color-input"
+                    [id]="'team-color-' + $index"
                     type="color"
-                    label="Couleur"
-                    labelPlacement="stacked"
                     [(ngModel)]="team.color"
                   />
                 </ion-item>

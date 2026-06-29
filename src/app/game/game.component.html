@@ -1,28 +1,33 @@
-<div class="game ion-padding">
+<div class="game-container">
   @if (game$ | async; as state) {
     @if (state.game; as game) {
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>{{ displayGameName(game) }}</ion-card-title>
-        </ion-card-header>
-
-        <ion-card-content>
-          @for (team of game.teams; track trackTeam($index, team)) {
-            <div class="team-score-row">
-              <span class="team-name" [style.color]="team.color">{{
-                team.name || 'Equipe sans nom'
-              }}</span>
-              <ion-button fill="outline" size="small" (click)="changeScore(game, $index, -1)"
-                >-</ion-button
-              >
-              <span class="score" [style.color]="team.color">{{ team.score }}</span>
-              <ion-button fill="solid" size="small" (click)="changeScore(game, $index, 1)"
-                >+</ion-button
-              >
-            </div>
-          }
-        </ion-card-content>
-      </ion-card>
+      <div class="game-found">
+        @for (team of game.teams; track trackTeam($index, team)) {
+          <div
+            class="team-score-row"
+            [style.background]="team.color"
+            [style.--team-contrast]="getContrastColor(team.color)"
+            [style.--team-contrast-inverse]="getInverseContrastColor(team.color)"
+          >
+            <span class="team-name">{{ team.name || 'Equipe sans nom' }}</span>
+            <ion-button
+              class="score-action score-action-minus"
+              fill="outline"
+              size="small"
+              (click)="changeScore(game, $index, -1)"
+              >-</ion-button
+            >
+            <span class="score">{{ team.score }}</span>
+            <ion-button
+              class="score-action score-action-plus"
+              fill="solid"
+              size="small"
+              (click)="changeScore(game, $index, 1)"
+              >+</ion-button
+            >
+          </div>
+        }
+      </div>
     } @else {
       <div class="not-found ion-padding ion-text-center">
         <ion-icon name="alert-circle-outline" class="not-found-icon" color="medium" />
